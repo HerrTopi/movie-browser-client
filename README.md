@@ -32,3 +32,4 @@ Clicking the floating `search` icon in the bottom-right corner will bring you ba
 - Request per user should be limited somewhat to prevent attacks
 - Better error handling is needed for production
 - Tests are needed
+- Wikipedia searches are pretty bad. Should be improved

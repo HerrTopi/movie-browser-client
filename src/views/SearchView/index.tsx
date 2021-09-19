@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { useHistory } from "react-router-dom";
 import { Container, Paper, InputBase, Divider, IconButton } from '@mui/material';
@@ -20,18 +20,27 @@ export type MovieInfo = {
 
 const SearchView = () => {
   const URLQuery = useURLQuery();
+  const movieInUrl = URLQuery.get("movie") as string
   const history = useHistory();
-  const [searchTerm, setSearchTerm] = useState(URLQuery.get("movie") || "")
+  const [searchTerm, setSearchTerm] = useState(movieInUrl || "")
   const [currentlyLoaded, setCurrentlyLoaded] = useState("")
-  const { data } = useQuery(`movies`, () => GET({
-    path: `movies?query=${searchTerm}`
+  const { data, refetch } = useQuery(`movies`, () => GET({
+    path: `movies?query=${movieInUrl}`
   }), {
     onSuccess: () => {
-      setCurrentlyLoaded(searchTerm)
+      setSearchTerm(movieInUrl)
+      setCurrentlyLoaded(movieInUrl)
     },
-    enabled: currentlyLoaded === "" && URLQuery.get("movie") !== null,
+    enabled: currentlyLoaded === "" && movieInUrl !== null,
     placeholderData: [],
-  }) as { data: Array<MovieInfo> }
+  }) as { data: Array<MovieInfo>, refetch: any }
+
+  useEffect(() => {
+    console.log({ currentlyLoaded, movieInUrl, searchTerm, wtf: currentlyLoaded !== movieInUrl && searchTerm !== "" && movieInUrl !== null })
+    if (currentlyLoaded !== movieInUrl && searchTerm !== "" && movieInUrl !== null) {
+      refetch()
+    }
+  }, [movieInUrl, currentlyLoaded, refetch, searchTerm])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -40,12 +49,16 @@ const SearchView = () => {
   }
 
   const handleSeach = () => {
+    //trim query
+    const trimmedQuery = searchTerm.trim()
+
     //make sure that the user typed in at least a character and 
     //they don't want to repeat the currently loaded search
-    if (searchTerm.length && currentlyLoaded !== searchTerm) {
+    if (trimmedQuery.length && currentlyLoaded !== trimmedQuery) {
       //this is needed to enable react query
       setCurrentlyLoaded("")
-      history.push(`/?movie=${searchTerm}`);
+      setSearchTerm(trimmedQuery)
+      history.push(`/?movie=${trimmedQuery}`);
     }
 
   }

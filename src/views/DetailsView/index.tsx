@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { useHistory, useParams } from 'react-router-dom'
 import { Rating, Button, Container, IconButton, Paper, Tooltip, Typography } from '@mui/material'
@@ -41,7 +41,7 @@ const DetailsView = () => {
   if (!id) {
     history.push('/search')
   }
-  const { data: TMDBData } = useQuery(`movie`, () => GET({
+  const { data: TMDBData, refetch } = useQuery(`movie`, () => GET({
     path: `movie?id=${id}`
   }), {
     placeholderData: {
@@ -51,7 +51,7 @@ const DetailsView = () => {
       release_date: "",
       vote_average: 0
     }
-  }) as { data: MovieInfoDetails, isLoading: boolean }
+  }) as { data: MovieInfoDetails, isLoading: boolean, refetch: any }
 
   const { data: wikiData } = useQuery(`movie-from-wiki-${TMDBData.title}`, () => GET({
     path: `api/rest_v1/page/summary/${TMDBData.title}`,
@@ -59,7 +59,9 @@ const DetailsView = () => {
     withOutAccessControlAllowOrigin: true
   }), {
     placeholderData: {},
-    enabled: TMDBData.id !== 0
+    enabled: TMDBData.id !== 0,
+    retry: false,
+    refetchOnWindowFocus: false
   }) as { data: MovieInfoWiki }
 
   const { data: similarData } = useQuery(`similarMovies`, () => GET({
@@ -68,6 +70,14 @@ const DetailsView = () => {
     placeholderData: [],
     enabled: showSimilarMovies
   }) as { data: Array<MovieInfo> }
+
+  useEffect(() => {
+    if (TMDBData.id !== +id) {
+      setShowSimilarMovies(false)
+      refetch()
+    }
+  }, [TMDBData, id, refetch])
+
 
   const IMDBId = TMDBData?.imdb_id
   const thumbnailSource = wikiData?.thumbnail?.source || "../images/noImgFound.jpg"
@@ -107,16 +117,16 @@ const DetailsView = () => {
           <img src={thumbnailSource} alt={`${TMDBData.title} poster`} />
         </div>
         <div className={style.details}>
-          <div className={style.overview}>{overView}</div>
+
+          <div className={style.overview}>{wikiUrl ? overView : "No Wiki article for this movie"}</div>
           <div>
             {wikiUrl &&
-              <> <a target="_blank" rel="noreferrer" href={wikiUrl}>
+              <> <a target="_blank" className={style.wikiUrl} rel="noreferrer" href={wikiUrl}>
                 <img width="30" src="../images/wikipedia.ico" alt="Wikipedia" />
               </a>
-                {" "}
               </>
             }
-            {wikiUrl &&
+            {IMDBId &&
               <a target="_blank" rel="noreferrer" href={`https://www.imdb.com/title/${IMDBId}`}>
                 <img width="30" src="../images/IMDb.ico" alt="IMDb" />
               </a>

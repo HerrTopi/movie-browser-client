@@ -28,6 +28,9 @@ const useStyles = makeStyles({
         position: "fixed",
         bottom: 50,
         right: 50
+    },
+    wikiUrl: {
+        marginRight: "10px"
     }
 })
 

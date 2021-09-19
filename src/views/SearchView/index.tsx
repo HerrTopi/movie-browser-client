@@ -36,7 +36,6 @@ const SearchView = () => {
   }) as { data: Array<MovieInfo>, refetch: any }
 
   useEffect(() => {
-    console.log({ currentlyLoaded, movieInUrl, searchTerm, wtf: currentlyLoaded !== movieInUrl && searchTerm !== "" && movieInUrl !== null })
     if (currentlyLoaded !== movieInUrl && searchTerm !== "" && movieInUrl !== null) {
       refetch()
     }

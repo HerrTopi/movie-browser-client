@@ -55,7 +55,8 @@ const DetailsView = () => {
 
   const { data: wikiData } = useQuery(`movie-from-wiki-${TMDBData.title}`, () => GET({
     path: `api/rest_v1/page/summary/${TMDBData.title}`,
-    url: 'https://en.wikipedia.org'
+    url: 'https://en.wikipedia.org',
+    withOutAccessControlAllowOrigin: true
   }), {
     placeholderData: {},
     enabled: TMDBData.id !== 0

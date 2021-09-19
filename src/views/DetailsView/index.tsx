@@ -75,9 +75,11 @@ const DetailsView = () => {
 
   return (
     <Container maxWidth="md">
-      <IconButton className={style.backToSearch} onClick={() => history.push('/')}>
-        <SearchIcon fontSize="large" />
-      </IconButton>
+      <div className={style.backToSearch}>
+        <IconButton onClick={() => history.push('/')}>
+          <SearchIcon fontSize="large" />
+        </IconButton>
+      </div>
       <Typography variant="h1" align="center" component="div" gutterBottom>
         {TMDBData.title}
       </Typography>

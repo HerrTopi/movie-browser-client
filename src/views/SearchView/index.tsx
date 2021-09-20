@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useQuery } from 'react-query'
 import { useHistory } from "react-router-dom";
-import { Container, Paper, InputBase, Divider, IconButton } from '@mui/material';
+import { Container, Paper, InputBase, Divider, IconButton, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 import { GET } from '../../utils/HTTP_REQUEST'
@@ -24,17 +24,16 @@ const SearchView = () => {
   const history = useHistory();
   const [searchTerm, setSearchTerm] = useState(movieInUrl || "")
   const [currentlyLoaded, setCurrentlyLoaded] = useState("")
-  const { data, refetch } = useQuery(`movies`, () => GET({
+  const { data, refetch, isFetching } = useQuery(`movies`, () => GET({
     path: `movies?query=${movieInUrl}`
   }), {
     onSuccess: () => {
       setSearchTerm(movieInUrl)
       setCurrentlyLoaded(movieInUrl)
     },
-    enabled: currentlyLoaded === "" && movieInUrl !== null,
-    placeholderData: [],
-  }) as { data: Array<MovieInfo>, refetch: any }
-
+    enabled: false,
+  }) as { data: Array<MovieInfo>, refetch: any, isFetching: boolean }
+  console.log(data)
   useEffect(() => {
     if (currentlyLoaded !== movieInUrl && searchTerm !== "" && movieInUrl !== null) {
       refetch()
@@ -65,6 +64,9 @@ const SearchView = () => {
     setSearchTerm(e?.target?.value)
   }
 
+  const resultsFound = !isFetching && data && data.length > 0
+  const noResultsFound = !isFetching && data && data.length === 0
+
   return (
     <Container maxWidth="md">
       <Paper sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }} >
@@ -80,7 +82,13 @@ const SearchView = () => {
           <SearchIcon />
         </IconButton>
       </Paper>
-      {data && <MovieListView movies={data} />}
+      {isFetching && <Typography variant="h3" component="div">
+        Loading...
+      </Typography>}
+      {noResultsFound && <Typography variant="h3" component="div">
+        No results found
+      </Typography>}
+      {resultsFound && <MovieListView movies={data} />}
     </Container>
   )
 }

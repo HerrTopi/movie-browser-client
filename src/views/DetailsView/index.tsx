@@ -53,7 +53,7 @@ const DetailsView = () => {
     }
   }) as { data: MovieInfoDetails, isLoading: boolean, refetch: any }
 
-  const { data: wikiData } = useQuery(`movie-from-wiki-${TMDBData.title}`, () => GET({
+  const { data: wikiData, isFetching: wikiIsFetching } = useQuery(`movie-from-wiki-${TMDBData.title}`, () => GET({
     path: `api/rest_v1/page/summary/${TMDBData.title}`,
     url: 'https://en.wikipedia.org',
     withOutAccessControlAllowOrigin: true
@@ -62,7 +62,7 @@ const DetailsView = () => {
     enabled: TMDBData.id !== 0,
     retry: false,
     refetchOnWindowFocus: false
-  }) as { data: MovieInfoWiki }
+  }) as { data: MovieInfoWiki, isFetching: boolean }
 
   const { data: similarData } = useQuery(`similarMovies`, () => GET({
     path: `similar?id=${id}`
@@ -118,7 +118,7 @@ const DetailsView = () => {
         </div>
         <div className={style.details}>
 
-          <div className={style.overview}>{wikiUrl ? overView : "No Wiki article for this movie"}</div>
+          <div className={style.overview}>{!wikiUrl && !wikiIsFetching ? "No Wiki article for this movie" : overView}</div>
           <div>
             {wikiUrl &&
               <> <a target="_blank" className={style.wikiUrl} rel="noreferrer" href={wikiUrl}>
